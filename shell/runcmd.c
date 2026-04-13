@@ -10,6 +10,7 @@ run_cmd(char *cmd)
 	pid_t p;
 	struct cmd *parsed;
 
+
 	// if the "enter" key is pressed
 	// just print the prompt again
 	if (cmd[0] == END_STRING)
@@ -42,8 +43,13 @@ run_cmd(char *cmd)
 		if (parsed->type == PIPE)
 			parsed_pipe = parsed;
 
+		if (parsed->type != BACK)
+			setpgid(0, 0);
 		exec_cmd(parsed);
 	}
+
+	if (parsed->type != BACK)
+		setpgid(p, 0);
 
 	// stores the pid of the process
 	parsed->pid = p;
@@ -55,7 +61,15 @@ run_cmd(char *cmd)
 	// - print info about it with
 	// 	'print_back_info()'
 	//
-	// Your code here
+	if (parsed->type == BACK) {
+		struct backcmd *b = (struct backcmd *) parsed;
+		b->c->pid = p;
+		print_back_info(b->c);
+
+		free_command(parsed);
+		return 0;
+	}
+
 
 	// waits for the process to finish
 	waitpid(p, &status, 0);
