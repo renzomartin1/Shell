@@ -73,7 +73,7 @@ cd(char *cmd)
 		free(token);
 		return true;
 	}
-	
+
 	free(token);
 	return false;
 }
@@ -89,7 +89,7 @@ pwd(char *cmd)
 	char *token = get_command_argument(cmd, 0);
 	if (strcmp(token, "pwd") == 0) {
 		char *cwd = getcwd(NULL, 0);
-    	if (cwd != NULL) {
+		if (cwd != NULL) {
 			printf("%s\n", cwd);
 			free(cwd);
 		} else {
