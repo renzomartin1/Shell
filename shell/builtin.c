@@ -1,4 +1,24 @@
 #include "builtin.h"
+#include <unistd.h>
+
+// parses an argument of the command stream input
+static char *
+get_command_argument(char *buf, int idx)
+{
+	char *tok;
+	int i;
+
+	tok = (char *) calloc(ARGSIZE, sizeof(char));
+	i = 0;
+
+	while (buf[idx] != SPACE && buf[idx] != END_STRING) {
+		tok[i] = buf[idx];
+		i++;
+		idx++;
+	}
+
+	return tok;
+}
 
 // returns true if the 'exit' call
 // should be performed
@@ -7,9 +27,13 @@
 int
 exit_shell(char *cmd)
 {
-	// Your code here
-
-	return 0;
+	char *token = get_command_argument(cmd, 0);
+	if (strcmp(token, "exit") == 0) {
+		free(token);
+		return true;
+	}
+	free(token);
+	return false;
 }
 
 // returns true if "chdir" was performed
@@ -27,9 +51,31 @@ exit_shell(char *cmd)
 int
 cd(char *cmd)
 {
-	// Your code here
+	char *token = get_command_argument(cmd, 0);
+	if (strcmp(token, "cd") == 0) {
+		if (strlen(cmd) > 3) {
+			char *dir = get_command_argument(cmd, 3);
+			if (chdir(dir) < 0) {
+				perror("chdir");
+			}
+			free(dir);
+		} else {
+			if (chdir(getenv("HOME")) < 0) {
+				perror("chdir");
+			}
+		}
 
-	return 0;
+		char *cwd = getcwd(NULL, 0);
+		if (cwd != NULL) {
+			snprintf(prompt, sizeof(prompt), "(%s)", cwd);
+		}
+		free(cwd);
+		free(token);
+		return true;
+	}
+	
+	free(token);
+	return false;
 }
 
 // returns true if 'pwd' was invoked
@@ -40,9 +86,20 @@ cd(char *cmd)
 int
 pwd(char *cmd)
 {
-	// Your code here
-
-	return 0;
+	char *token = get_command_argument(cmd, 0);
+	if (strcmp(token, "pwd") == 0) {
+		char *cwd = getcwd(NULL, 0);
+    	if (cwd != NULL) {
+			printf("%s\n", cwd);
+			free(cwd);
+		} else {
+			perror("getcwd() error");
+		}
+		free(token);
+		return true;
+	}
+	free(token);
+	return false;
 }
 
 // returns true if `history` was invoked
@@ -53,7 +110,11 @@ pwd(char *cmd)
 int
 history(char *cmd)
 {
-	// Your code here
-
-	return 0;
+	char *token = get_command_argument(cmd, 0);
+	if (strcmp(token, "history") == 0) {
+		free(token);
+		return true;
+	}
+	free(token);
+	return false;
 }
