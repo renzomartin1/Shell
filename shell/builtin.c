@@ -57,14 +57,20 @@ cd(char *cmd)
 			char *dir = get_command_argument(cmd, 3);
 			if (chdir(dir) < 0) {
 				char errmsg[ARGSIZE];
-				snprintf(errmsg, sizeof(errmsg), "cannot cd to %s ", dir);
+				snprintf(errmsg,
+				         sizeof(errmsg),
+				         "cannot cd to %s ",
+				         dir);
 				perror(errmsg);
 			}
 			free(dir);
 		} else {
 			if (chdir(getenv("HOME")) < 0) {
 				char errmsg[ARGSIZE];
-				snprintf(errmsg, sizeof(errmsg), "cannot cd to %s ", getenv("HOME"));
+				snprintf(errmsg,
+				         sizeof(errmsg),
+				         "cannot cd to %s ",
+				         getenv("HOME"));
 				perror(errmsg);
 			}
 		}
