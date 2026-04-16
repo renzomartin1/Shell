@@ -20,6 +20,16 @@ get_command_argument(char *buf, int idx)
 	return tok;
 }
 
+static void
+change_directory(char *dir)
+{
+	if (chdir(dir) < 0) {
+		char errmsg[ARGSIZE];
+		snprintf(errmsg, sizeof(errmsg), "cannot cd to %s ", dir);
+		perror(errmsg);
+	}
+}
+
 // returns true if the 'exit' call
 // should be performed
 //
@@ -55,24 +65,10 @@ cd(char *cmd)
 	if (strcmp(token, "cd") == 0) {
 		if (strlen(cmd) > 3) {
 			char *dir = get_command_argument(cmd, 3);
-			if (chdir(dir) < 0) {
-				char errmsg[ARGSIZE];
-				snprintf(errmsg,
-				         sizeof(errmsg),
-				         "cannot cd to %s ",
-				         dir);
-				perror(errmsg);
-			}
+			change_directory(dir);
 			free(dir);
 		} else {
-			if (chdir(getenv("HOME")) < 0) {
-				char errmsg[ARGSIZE];
-				snprintf(errmsg,
-				         sizeof(errmsg),
-				         "cannot cd to %s ",
-				         getenv("HOME"));
-				perror(errmsg);
-			}
+			change_directory(getenv("HOME"));
 		}
 
 		char *cwd = getcwd(NULL, 0);
@@ -120,11 +116,5 @@ pwd(char *cmd)
 int
 history(char *cmd)
 {
-	char *token = get_command_argument(cmd, 0);
-	if (strcmp(token, "history") == 0) {
-		free(token);
-		return true;
-	}
-	free(token);
-	return false;
+	return 0;
 }
