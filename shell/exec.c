@@ -94,7 +94,7 @@ exec_cmd(struct cmd *cmd)
 		}
 
 		execvp(e->argv[0], e->argv);
-		perror("execvp");
+		perror("exec failed ");
 		_exit(1);
 
 	case BACK: {
