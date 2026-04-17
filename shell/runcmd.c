@@ -1,6 +1,7 @@
 #include "runcmd.h"
 
 int status = 0;
+pid_t last_pid = 0;  // PID del ultimo proceso lanzado en background (para $!)
 struct cmd *parsed_pipe;
 
 // runs the command in 'cmd'
@@ -17,20 +18,26 @@ run_cmd(char *cmd)
 		return 0;
 
 	// "history" built-in call
-	if (history(cmd))
+	if (history(cmd)) {
+		status = 0;  // los built-ins no pasan por waitpid, hay que actualizar status a mano
 		return 0;
+	}
 
 	// "cd" built-in call
-	if (cd(cmd))
+	if (cd(cmd)) {
+		status = 0;
 		return 0;
+	}
 
 	// "exit" built-in call
 	if (exit_shell(cmd))
 		return EXIT_SHELL;
 
 	// "pwd" built-in call
-	if (pwd(cmd))
+	if (pwd(cmd)) {
+		status = 0;
 		return 0;
+	}
 
 	// parses the command line
 	parsed = parse_line(cmd);
@@ -64,6 +71,7 @@ run_cmd(char *cmd)
 	if (parsed->type == BACK) {
 		struct backcmd *b = (struct backcmd *) parsed;
 		b->c->pid = p;
+		last_pid = p;  // guardamos el PID para poder expandir $!
 		print_back_info(b->c);
 
 		free_command(parsed);
