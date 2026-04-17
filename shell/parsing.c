@@ -186,14 +186,14 @@ parse_line(char *buf)
 {
 	struct cmd *r, *l;
 
-        char *right = split_line(buf, '|');
+	char *right = split_line(buf, '|');
 
-        if(right == NULL || strlen(right) == 0){
-                return parse_cmd(buf);
-        }
+	if (right == NULL || strlen(right) == 0) {
+		return parse_cmd(buf);
+	}
 
-        l = parse_cmd(buf);
-        r = parse_line(right);
+	l = parse_cmd(buf);
+	r = parse_line(right);
 
-        return pipe_cmd_create(l, r);
+	return pipe_cmd_create(l, r);
 }
