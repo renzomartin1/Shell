@@ -47,17 +47,13 @@ run_cmd(char *cmd)
 		// keep a reference
 		// to the parsed pipe cmd
 		// so it can be freed later
+		setpgid(0, 0);
 		if (parsed->type == PIPE)
 			parsed_pipe = parsed;
-
-		if (parsed->type != BACK)
-			setpgid(0, 0);
 		exec_cmd(parsed);
 	}
 
-	if (parsed->type != BACK)
-		setpgid(p, 0);
-
+	setpgid(p, p);
 	// stores the pid of the process
 	parsed->pid = p;
 
@@ -71,7 +67,6 @@ run_cmd(char *cmd)
 	if (parsed->type == BACK) {
 		struct backcmd *b = (struct backcmd *) parsed;
 		b->c->pid = p;
-		last_pid = p;  // guardamos el PID para poder expandir $!
 		print_back_info(b->c);
 
 		free_command(parsed);
