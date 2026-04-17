@@ -1,5 +1,9 @@
 #include "parsing.h"
 
+// necesitamos estas dos para expandir $? y $!
+extern int status;
+extern pid_t last_pid;
+
 // parses an argument of the command stream input
 static char *
 get_token(char *buf, int idx)
@@ -101,8 +105,35 @@ parse_environ_var(struct execcmd *c, char *arg)
 static char *
 expand_environ_var(char *arg)
 {
-	// Your code here
-
+	if (arg[0] != '$'){ // vemos is empieza con $
+		return arg;
+	}
+	char *var_name = arg + 1;
+	char buf[32];
+	char *value = NULL;
+	// pseudo-variables propias de la shell
+	if (strcmp(var_name, "?") == 0) {
+		snprintf(buf, sizeof buf, "%d", status); // exit status del ultimo comando
+		value = buf;
+	} else if (strcmp(var_name, "$") == 0) {
+		snprintf(buf, sizeof buf, "%d", getpid()); // PID  shell actual
+		value = buf;
+	} else if (strcmp(var_name, "!") == 0) {
+		snprintf(buf, sizeof buf, "%d", last_pid); // PID del ultimo proceso en el background
+		value = buf;
+	} else {
+		value = getenv(var_name); // variable de entorno normal
+	}
+	// manejamos la variable que no existe
+	if (value == NULL || strlen(value) == 0) {
+		arg[0] = END_STRING;
+		return arg;
+	}
+	size_t len = strlen(value);
+	if (len >= ARGSIZE){  // prevencion de buffer overflow
+		arg = realloc(arg, len + 1);
+	}
+	strncpy(arg, value, len + 1);
 	return arg;
 }
 
@@ -133,7 +164,11 @@ parse_exec(char *buf_cmd)
 			continue;
 
 		tok = expand_environ_var(tok);
-
+		
+		if (tok[0] == END_STRING) { // si esta vacio no lo pasamos
+			free(tok);
+			continue;
+		}
 		c->argv[argc++] = tok;
 	}
 
