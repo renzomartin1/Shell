@@ -39,10 +39,11 @@ sigchild_handler(int signum)
 	int status;
 
 	while ((pid = waitpid(0, &status, WNOHANG)) > 0) {
-		char str[BUFLEN] = { 0 };
-
-		snprintf(str, sizeof(str), "==> terminado: PID=%d\n", pid);
-		write(STDOUT_FILENO, str, strlen(str));
+		if (isatty(STDOUT_FILENO)) {
+			char str[BUFLEN] = { 0 };
+			snprintf(str, sizeof(str), "==> terminado: PID=%d\n", pid);
+			write(STDOUT_FILENO, str, strlen(str));
+		}
 	}
 }
 

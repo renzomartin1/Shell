@@ -180,6 +180,7 @@ exec_cmd(struct cmd *cmd)
 			_exit(1);
 		}
 
+
 		pid_t right = fork();
 		if (right == 0) {
 			dup2(fd[0], STDIN_FILENO);
@@ -195,12 +196,12 @@ exec_cmd(struct cmd *cmd)
 
 		waitpid(left, NULL, 0);
 		waitpid(right, NULL, 0);
-		// printf("Pipes are not yet implemented\n");
 
+		// printf("Pipes are not yet implemented\n");
 		// free the memory allocated
 		// for the pipe tree structure
-		// free_command(parsed_pipe);
-
+		free_command(parsed_pipe);
+		_exit(0);
 		break;
 	}
 	}
