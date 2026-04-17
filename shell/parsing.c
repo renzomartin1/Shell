@@ -105,7 +105,7 @@ parse_environ_var(struct execcmd *c, char *arg)
 static char *
 expand_environ_var(char *arg)
 {
-	if (arg[0] != '$'){ // vemos is empieza con $
+	if (arg[0] != '$') {  // vemos is empieza con $
 		return arg;
 	}
 	char *var_name = arg + 1;
@@ -113,16 +113,22 @@ expand_environ_var(char *arg)
 	char *value = NULL;
 	// pseudo-variables propias de la shell
 	if (strcmp(var_name, "?") == 0) {
-		snprintf(buf, sizeof buf, "%d", status); // exit status del ultimo comando
+		snprintf(buf,
+		         sizeof buf,
+		         "%d",
+		         status);  // exit status del ultimo comando
 		value = buf;
 	} else if (strcmp(var_name, "$") == 0) {
-		snprintf(buf, sizeof buf, "%d", getpid()); // PID  shell actual
+		snprintf(buf, sizeof buf, "%d", getpid());  // PID  shell actual
 		value = buf;
 	} else if (strcmp(var_name, "!") == 0) {
-		snprintf(buf, sizeof buf, "%d", last_pid); // PID del ultimo proceso en el background
+		snprintf(buf,
+		         sizeof buf,
+		         "%d",
+		         last_pid);  // PID del ultimo proceso en el background
 		value = buf;
 	} else {
-		value = getenv(var_name); // variable de entorno normal
+		value = getenv(var_name);  // variable de entorno normal
 	}
 	// manejamos la variable que no existe
 	if (value == NULL || strlen(value) == 0) {
@@ -130,7 +136,7 @@ expand_environ_var(char *arg)
 		return arg;
 	}
 	size_t len = strlen(value);
-	if (len >= ARGSIZE){  // prevencion de buffer overflow
+	if (len >= ARGSIZE) {  // prevencion de buffer overflow
 		arg = realloc(arg, len + 1);
 	}
 	strncpy(arg, value, len + 1);
@@ -164,8 +170,8 @@ parse_exec(char *buf_cmd)
 			continue;
 
 		tok = expand_environ_var(tok);
-		
-		if (tok[0] == END_STRING) { // si esta vacio no lo pasamos
+
+		if (tok[0] == END_STRING) {  // si esta vacio no lo pasamos
 			free(tok);
 			continue;
 		}

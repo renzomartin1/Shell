@@ -49,7 +49,7 @@ static void
 set_environ_vars(char **eargv, int eargc)
 {
 	// aplico VAR=valor al entorno del hijo antes del exec
-        //  y se llama despues del fork para no contaminar shell padre
+	//  y se llama despues del fork para no contaminar shell padre
 	char key[ARGSIZE], value[ARGSIZE];
 	for (int i = 0; i < eargc; i++) {
 		int idx = block_contains(eargv[i], '=');
@@ -103,7 +103,7 @@ exec_cmd(struct cmd *cmd)
 		if (e->argv[0] == NULL) {
 			_exit(0);
 		}
-		set_environ_vars(e->eargv, e->eargc); // las variables temporarias 
+		set_environ_vars(e->eargv, e->eargc);  // las variables temporarias
 		execvp(e->argv[0], e->argv);
 		perror("exec failed ");
 		_exit(1);
