@@ -180,6 +180,7 @@ exec_cmd(struct cmd *cmd)
 
 		pid_t left = fork();
 		if (left == 0) {
+			setpgid(0, 0);
 			dup2(fd[1], STDOUT_FILENO);
 			close(fd[0]);
 			close(fd[1]);
@@ -187,10 +188,11 @@ exec_cmd(struct cmd *cmd)
 			exec_cmd(p->leftcmd);
 			_exit(1);
 		}
-
+		setpgid(left, left);
 
 		pid_t right = fork();
 		if (right == 0) {
+			setpgid(0, left);
 			dup2(fd[0], STDIN_FILENO);
 			close(fd[1]);
 			close(fd[0]);
@@ -198,6 +200,7 @@ exec_cmd(struct cmd *cmd)
 			exec_cmd(p->rightcmd);
 			_exit(1);
 		}
+		setpgid(right, left);
 
 		close(fd[0]);
 		close(fd[1]);

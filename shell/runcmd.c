@@ -1,8 +1,10 @@
 #include "runcmd.h"
 
 int status = 0;
-pid_t last_pid = 0;  // PID del ultimo proceso lanzado en background (para $!)
 struct cmd *parsed_pipe;
+pid_t last_pid = 0;
+static int is_background = 0;
+
 
 // runs the command in 'cmd'
 int
@@ -42,20 +44,24 @@ run_cmd(char *cmd)
 	// parses the command line
 	parsed = parse_line(cmd);
 
+	is_background = (parsed->type == BACK);
+
 	// forks and run the command
 	if ((p = fork()) == 0) {
-		// keep a reference
-		// to the parsed pipe cmd
-		// so it can be freed later
-		setpgid(0, 0);
+		if (parsed->type != BACK)
+			setpgid(0, 0);
 		if (parsed->type == PIPE)
 			parsed_pipe = parsed;
 		exec_cmd(parsed);
+		_exit(1);
 	}
 
-	setpgid(p, p);
-	// stores the pid of the process
+
+	if (parsed->type != BACK)
+		setpgid(p, p);
+
 	parsed->pid = p;
+	last_pid = p;
 
 	// background process special treatment
 	// Hint:
@@ -68,7 +74,6 @@ run_cmd(char *cmd)
 		struct backcmd *b = (struct backcmd *) parsed;
 		b->c->pid = p;
 		print_back_info(b->c);
-
 		free_command(parsed);
 		return 0;
 	}

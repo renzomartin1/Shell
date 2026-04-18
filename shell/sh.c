@@ -38,9 +38,8 @@ sigchild_handler(int signum)
 	pid_t pid;
 	int status;
 
-	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+	while ((pid = waitpid(0, &status, WNOHANG)) > 0) {
 		char str[BUFLEN] = { 0 };
-
 		snprintf(str, sizeof(str), "==> terminado: PID=%d\n", pid);
 		write(STDOUT_FILENO, str, strlen(str));
 	}
@@ -70,7 +69,6 @@ init_signals()
 
 
 	struct sigaction sa;
-	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = sigchild_handler;
 	sa.sa_flags = SA_RESTART | SA_ONSTACK;
 	sigemptyset(&sa.sa_mask);
@@ -83,9 +81,9 @@ init_signals()
 int
 main(void)
 {
+	setpgid(0, 0);
 	init_shell();
 	init_signals();
 	run_shell();
-
 	return 0;
 }
